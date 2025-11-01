@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 import 'pages/menu.dart';
 import 'pages/pedidos.dart';
-import 'pages/products_list.dart';
 import 'pages/product_detail.dart';
 import 'pages/categories.dart';
 import 'pages/search.dart';
@@ -17,10 +16,8 @@ import 'pages/profile.dart';
 import 'pages/addresses.dart';
 import 'pages/address_edit.dart';
 import 'pages/payment_methods.dart';
-import 'pages/favorites.dart';
 import 'pages/orders_history.dart';
 import 'pages/order_detail.dart';
-import 'pages/notifications.dart';
 import 'pages/help_center.dart';
 import 'pages/terms.dart';
 import 'pages/privacy.dart';
@@ -47,7 +44,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/menu': (context) => const MenuPage(),
         '/pedidos': (context) => const PantallaPedidos(),
-        '/products': (context) => const ProductsListPage(),
         '/product': (context) => const ProductDetailPage(),
         '/categories': (context) => const CategoriesPage(),
         '/search': (context) => const SearchPage(),
@@ -62,10 +58,8 @@ class MyApp extends StatelessWidget {
         '/addresses': (context) => const AddressesPage(),
         '/address/edit': (context) => const AddressEditPage(),
         '/payment-methods': (context) => const PaymentMethodsPage(),
-        '/favorites': (context) => const FavoritesPage(),
         '/orders': (context) => const OrdersHistoryPage(),
         '/order': (context) => const OrderDetailPage(),
-        '/notifications': (context) => const NotificationsPage(),
         '/help': (context) => const HelpCenterPage(),
         '/terms': (context) => const TermsPage(),
         '/privacy': (context) => const PrivacyPage(),

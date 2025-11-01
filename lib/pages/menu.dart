@@ -1,16 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:hello_world/models/product.dart';
+import 'package:hello_world/services/products_service.dart';
+import 'package:hello_world/services/cart_service.dart';
 
 class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final products = ProductsService().getAll();
+    final cart = CartService();
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
       appBar: AppBar(
         title: const Text('Natura CO'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
+        actions: [
+          ValueListenableBuilder<List<CartLine>>(
+            valueListenable: cart.lines,
+            builder: (context, lines, _) {
+              final count = cart.itemsCount();
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () => Navigator.pushNamed(context, '/cart'),
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: CircleAvatar(
+                        radius: 9,
+                        backgroundColor: Colors.redAccent,
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(fontSize: 11, color: Colors.white),
+                        ),
+                      ),
+                    )
+                ],
+              );
+            },
+          )
+        ],
       ),
       drawer: _buildCompactDrawer(context),
       body: Column(
@@ -18,20 +52,25 @@ class MenuPage extends StatelessWidget {
           // Barra de búsqueda
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  hintText: 'Buscar...',
-                  hintStyle: TextStyle(color: Color(0xFF718096)),
-                  prefixIcon: Icon(Icons.search, color: Color(0xFF718096)),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Container(
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Buscar...',
+                      hintStyle: TextStyle(color: Color(0xFF718096)),
+                      prefixIcon: Icon(Icons.search, color: Color(0xFF718096)),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -48,8 +87,25 @@ class MenuPage extends StatelessWidget {
                   mainAxisSpacing: 16,
                   childAspectRatio: 0.75,
                 ),
-                itemCount: 6,
-                itemBuilder: (context, index) => _buildProductCard(),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final p = products[index];
+                  return _buildProductCard(
+                    context,
+                    product: p,
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      '/product',
+                      arguments: p.id,
+                    ),
+                    onAdd: () {
+                      cart.add(p);
+                      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                        const SnackBar(content: Text('Producto agregado al carrito')),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),
@@ -101,13 +157,6 @@ class MenuPage extends StatelessWidget {
                     icon: Icons.home,
                     isSelected: true,
                     onTap: () => Navigator.pop(context),
-                  ),
-                  _buildCompactDrawerItem(
-                    icon: Icons.shopping_bag,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/products');
-                    },
                   ),
                   _buildCompactDrawerItem(
                     icon: Icons.shopping_cart,
@@ -180,58 +229,64 @@ class MenuPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 100,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              image: DecorationImage(
-                image: NetworkImage(
-                  'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop'
+  Widget _buildProductCard(
+    BuildContext context, {
+    required Product product,
+    required VoidCallback onTap,
+    required VoidCallback onAdd,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                image: DecorationImage(
+                  image: NetworkImage(product.imageUrl),
+                  fit: BoxFit.cover,
                 ),
-                fit: BoxFit.cover,
               ),
             ),
-          ),
-          
-          const Padding(
-            padding: EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '\$228.00',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2D3748),
+            
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'S/ ${product.price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2D3748),
+                    ),
                   ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Playera manga corta',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF4A5568),
-                    fontWeight: FontWeight.w500,
+                  SizedBox(height: 6),
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF4A5568),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
                   ),
-                  maxLines: 2,
-                ),
-                SizedBox(height: 8),
-                _AddButton(),
-              ],
+                  SizedBox(height: 8),
+                  _AddButton(onPressed: onAdd),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -262,25 +317,25 @@ class MenuPage extends StatelessWidget {
 }
 
 class _AddButton extends StatelessWidget {
-  const _AddButton();
+  final VoidCallback onPressed;
+  const _AddButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 30,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2D3748),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: const Center(
-        child: Text(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2D3748),
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        ),
+        onPressed: onPressed,
+        child: const Text(
           'Agregar',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ),
     );
