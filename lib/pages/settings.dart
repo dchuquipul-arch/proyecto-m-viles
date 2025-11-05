@@ -3,6 +3,7 @@ import 'package:hello_world/services/checkout_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/services/orders_service.dart';
 
+// Pantalla de configuración y datos locales
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -12,22 +13,27 @@ class SettingsPage extends StatelessWidget {
     final cart = CartService();
     final orders = OrdersService();
 
+    // Estructura base
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
+      // Barra superior
       appBar: AppBar(
         title: const Text('Configuración'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
       ),
+      // Lista de opciones configurables
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
+          // Encabezado: cuenta de compra
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Text('Cuenta de compra',
                 style: TextStyle(color: Colors.white70, fontSize: 13)),
           ),
 
+          // Dirección de envío editable mediante diálogo
           ValueListenableBuilder<String?>(
             valueListenable: checkout.shippingAddress,
             builder: (context, address, _) => ListTile(
@@ -40,6 +46,7 @@ class SettingsPage extends StatelessWidget {
                 final controller = TextEditingController(text: address ?? '');
                 final result = await showDialog<String>(
                   context: context,
+                  // Diálogo para editar dirección
                   builder: (ctx) => AlertDialog(
                     title: const Text('Editar dirección de envío'),
                     content: TextField(
@@ -71,6 +78,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
 
+          // Método de pago preferido con selección en bottom sheet
           ValueListenableBuilder<String?>(
             valueListenable: checkout.paymentMethod,
             builder: (context, method, _) => ListTile(
@@ -84,6 +92,7 @@ class SettingsPage extends StatelessWidget {
                 final selected = await showModalBottomSheet<String>(
                   context: context,
                   backgroundColor: const Color(0xFF1A202C),
+                  // Hoja inferior con opciones
                   builder: (ctx) => SafeArea(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -112,12 +121,14 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
 
+          // Encabezado: datos y almacenamiento
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text('Datos y almacenamiento',
                 style: TextStyle(color: Colors.white70, fontSize: 13)),
           ),
 
+          // Acción: vaciar carrito con confirmación
           ListTile(
             title: const Text('Vaciar carrito',
                 style: TextStyle(color: Colors.white)),
@@ -127,6 +138,7 @@ class SettingsPage extends StatelessWidget {
             onTap: () async {
               final ok = await showDialog<bool>(
                 context: context,
+                // Diálogo de confirmación
                 builder: (ctx) => AlertDialog(
                   title: const Text('Vaciar carrito'),
                   content: const Text(
@@ -152,6 +164,7 @@ class SettingsPage extends StatelessWidget {
             },
           ),
 
+          // Acción: borrar historial de pedidos con confirmación
           ListTile(
             title: const Text('Borrar historial de pedidos',
                 style: TextStyle(color: Colors.white)),
@@ -162,6 +175,7 @@ class SettingsPage extends StatelessWidget {
             onTap: () async {
               final ok = await showDialog<bool>(
                 context: context,
+                // Diálogo de confirmación
                 builder: (ctx) => AlertDialog(
                   title: const Text('Borrar historial'),
                   content: const Text(

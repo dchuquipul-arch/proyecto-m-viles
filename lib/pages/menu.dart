@@ -3,6 +3,7 @@ import 'package:hello_world/models/product.dart';
 import 'package:hello_world/services/products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 
+// Página principal del menú de productos
 class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
 
@@ -10,17 +11,21 @@ class MenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final products = ProductsService().getAll();
     final cart = CartService();
+    // Estructura base de la pantalla
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
+      // Barra superior con título y acceso al carrito
       appBar: AppBar(
         title: const Text('Natura CO'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
         actions: [
+          // Escucha cambios del carrito para mostrar el contador
           ValueListenableBuilder<List<CartLine>>(
             valueListenable: cart.lines,
             builder: (context, lines, _) {
               final count = cart.itemsCount();
+              // Icono del carrito con badge de cantidad
               return Stack(
                 children: [
                   IconButton(
@@ -46,7 +51,9 @@ class MenuPage extends StatelessWidget {
           )
         ],
       ),
+      // Menú lateral compacto
       drawer: _buildCompactDrawer(context),
+      // Contenido principal: buscador + grilla de productos
       body: Column(
         children: [
           // Barra de búsqueda
@@ -57,18 +64,32 @@ class MenuPage extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 480),
                 child: Container(
                   height: 44,
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
+                  // Campo de texto para buscar productos
                   child: const TextField(
+                    cursorColor: Color(0xFF2D3748),
+                    textAlignVertical: TextAlignVertical.center,
+                    style: TextStyle(color: Color(0xFF2D3748)),
                     decoration: InputDecoration(
+                      isDense: true,
                       hintText: 'Buscar...',
                       hintStyle: TextStyle(color: Color(0xFF718096)),
                       prefixIcon: Icon(Icons.search, color: Color(0xFF718096)),
+                      prefixIconConstraints: BoxConstraints(minWidth: 44),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
                     ),
                   ),
                 ),
@@ -90,6 +111,7 @@ class MenuPage extends StatelessWidget {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final p = products[index];
+                  // Tarjeta individual del producto
                   return _buildProductCard(
                     context,
                     product: p,
@@ -111,10 +133,10 @@ class MenuPage extends StatelessWidget {
           ),
         ],
       ),
-      // ELIMINADA: bottomNavigationBar
     );
   }
 
+  // Drawer lateral compacto con accesos rápidos
   Widget _buildCompactDrawer(BuildContext context) {
     return SizedBox(
       width: 80,
@@ -153,11 +175,13 @@ class MenuPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Inicio
                   _buildCompactDrawerItem(
                     icon: Icons.home,
                     isSelected: true,
                     onTap: () => Navigator.pop(context),
                   ),
+                  // Carrito
                   _buildCompactDrawerItem(
                     icon: Icons.shopping_cart,
                     onTap: () {
@@ -165,13 +189,15 @@ class MenuPage extends StatelessWidget {
                       Navigator.pushNamed(context, '/cart');
                     },
                   ),
+                  // Perfil
                   _buildCompactDrawerItem(
                     icon: Icons.people,
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(context, '/profile');
+                      Navigator.pushNamed(context, '/appointment');
                     },
                   ),
+                  // Órdenes
                   _buildCompactDrawerItem(
                     icon: Icons.analytics,
                     onTap: () {
@@ -185,6 +211,7 @@ class MenuPage extends StatelessWidget {
 
             Column(
               children: [
+                // Ajustes
                 _buildCompactDrawerItem(
                   icon: Icons.settings,
                   onTap: () {
@@ -192,6 +219,7 @@ class MenuPage extends StatelessWidget {
                     Navigator.pushNamed(context, '/settings');
                   },
                 ),
+                // Cerrar sesión
                 _buildCompactDrawerItem(
                   icon: Icons.exit_to_app,
                   onTap: () => _showLogoutDialog(context),
@@ -205,6 +233,7 @@ class MenuPage extends StatelessWidget {
     );
   }
 
+  // Item del drawer con estado de selección
   Widget _buildCompactDrawerItem({
     required IconData icon,
     bool isSelected = false,
@@ -229,12 +258,14 @@ class MenuPage extends StatelessWidget {
     );
   }
 
+  // Tarjeta visual para cada producto en el grid
   Widget _buildProductCard(
     BuildContext context, {
     required Product product,
     required VoidCallback onTap,
     required VoidCallback onAdd,
   }) {
+    // Navega al detalle al tocar
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -281,6 +312,7 @@ class MenuPage extends StatelessWidget {
                     maxLines: 2,
                   ),
                   SizedBox(height: 8),
+                  // Botón para agregar al carrito
                   _AddButton(onPressed: onAdd),
                 ],
               ),
@@ -295,6 +327,7 @@ class MenuPage extends StatelessWidget {
     Navigator.pop(context);
     showDialog(
       context: context,
+      // Diálogo de confirmación de cierre de sesión
       builder: (context) => AlertDialog(
         title: const Text('Cerrar Sesión'),
         content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
@@ -316,6 +349,7 @@ class MenuPage extends StatelessWidget {
   }
 }
 
+// Botón reutilizable para agregar productos al carrito
 class _AddButton extends StatelessWidget {
   final VoidCallback onPressed;
   const _AddButton({required this.onPressed});

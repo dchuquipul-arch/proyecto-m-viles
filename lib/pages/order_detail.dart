@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/services/orders_service.dart';
 import 'package:hello_world/models/order.dart';
 
+// Pantalla de detalle de un pedido
 class OrderDetailPage extends StatelessWidget {
   const OrderDetailPage({super.key});
 
@@ -9,13 +10,16 @@ class OrderDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final id = ModalRoute.of(context)?.settings.arguments as String?;
     final Order? order = id != null ? OrdersService().getById(id) : null;
+    // Estructura base
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
+      // Barra superior con el ID del pedido
       appBar: AppBar(
         title: Text('Pedido #${id ?? '-'}'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
       ),
+      // Si no se encuentra el pedido, mensaje centrado
       body: order == null
           ? const Center(
               child: Text('Pedido no encontrado',
@@ -23,6 +27,7 @@ class OrderDetailPage extends StatelessWidget {
             )
           : Padding(
               padding: const EdgeInsets.all(16.0),
+              // Información del pedido + lista de productos + total
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -45,6 +50,7 @@ class OrderDetailPage extends StatelessWidget {
                         style: const TextStyle(color: Colors.white)),
                   ),
                   const SizedBox(height: 8),
+                  // Lista de productos del pedido
                   const Text('Productos',
                       style: TextStyle(color: Colors.white70)),
                   const SizedBox(height: 8),
@@ -54,6 +60,7 @@ class OrderDetailPage extends StatelessWidget {
                       separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (_, i) {
                         final it = order.items[i];
+                        // Ítem de producto
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(it.imageUrl),
@@ -73,6 +80,7 @@ class OrderDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  // Resumen del total
                   Row(
                     children: [
                       const Expanded(

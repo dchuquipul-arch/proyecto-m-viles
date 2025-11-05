@@ -1,3 +1,4 @@
+// Modelo de producto utilizado en la app
 class Product {
   final String id;
   final String name;
@@ -6,6 +7,7 @@ class Product {
   final double price;
   final String category;
 
+  // Crea una instancia inmutable de producto
   const Product({
     required this.id,
     required this.name,

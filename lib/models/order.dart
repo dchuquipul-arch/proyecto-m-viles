@@ -1,5 +1,6 @@
 import 'package:hello_world/services/cart_service.dart';
 
+// Ítem de un pedido (producto, cantidad y precio)
 class OrderItem {
   final String productId;
   final String name;
@@ -16,6 +17,7 @@ class OrderItem {
   double get lineTotal => unitPrice * quantity;
 }
 
+// Modelo de pedido con items y metadatos
 class Order {
   final String id;
   final DateTime createdAt;
@@ -33,6 +35,7 @@ class Order {
     this.paymentMethod,
   });
 
+  // Crea una orden a partir de líneas del carrito
   factory Order.fromCart({
     required String id,
     required List<CartLine> lines,

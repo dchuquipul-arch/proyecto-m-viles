@@ -3,6 +3,7 @@ import 'package:hello_world/models/product.dart';
 import 'package:hello_world/services/products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 
+// Pantalla de detalle de producto
 class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({super.key});
 
@@ -19,13 +20,16 @@ class ProductDetailPage extends StatelessWidget {
     }
     final cart = CartService();
 
+    // Estructura base
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
+      // Barra superior con acceso al carrito
       appBar: AppBar(
         title: const Text('Detalle de producto'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
         actions: [
+          // Badge del carrito en AppBar
           ValueListenableBuilder<List<CartLine>>(
             valueListenable: cart.lines,
             builder: (context, lines, _) {
@@ -55,16 +59,19 @@ class ProductDetailPage extends StatelessWidget {
           )
         ],
       ),
+      // Si no hay producto, mensaje
       body: product == null
           ? const Center(
               child: Text('Producto no encontrado',
                   style: TextStyle(color: Colors.white)),
             )
+          // Detalle con scroll
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Imagen principal
                   AspectRatio(
                     aspectRatio: 16 / 9,
                     child: ClipRRect(
@@ -73,27 +80,32 @@ class ProductDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Nombre
                   Text(product.name,
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
                           fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
+                  // Categoría
                   Text(product.category,
                       style:
                           const TextStyle(color: Colors.white70, fontSize: 14)),
                   const SizedBox(height: 12),
+                  // Precio
                   Text('S/ ${product.price.toStringAsFixed(2)}',
                       style: const TextStyle(
                           color: Colors.greenAccent,
                           fontSize: 20,
                           fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
+                  // Descripción
                   Text(product.description,
                       style: const TextStyle(color: Colors.white)),
                 ],
               ),
             ),
+      // Acciones inferiores: ver carrito y agregar
       bottomNavigationBar: product == null
           ? null
           : SafeArea(
@@ -102,6 +114,7 @@ class ProductDetailPage extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
+                      // Ir al carrito
                       child: OutlinedButton(
                         onPressed: () => Navigator.pushNamed(context, '/cart'),
                         child: const Text('Ver carrito'),
@@ -109,6 +122,7 @@ class ProductDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
+                      // Agregar al carrito
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.add_shopping_cart),
                         onPressed: () {

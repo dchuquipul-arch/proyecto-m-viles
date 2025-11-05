@@ -4,6 +4,7 @@ import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/models/order.dart';
 import 'package:hello_world/services/orders_service.dart';
 
+// Checkout: pantalla de revisión antes de confirmar
 class CheckoutReviewPage extends StatelessWidget {
   const CheckoutReviewPage({super.key});
 
@@ -12,18 +13,22 @@ class CheckoutReviewPage extends StatelessWidget {
     final checkout = CheckoutService();
     final cart = CartService();
 
+    // Estructura base de la pantalla
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
+      // Barra superior con título
       appBar: AppBar(
         title: const Text('Revisión'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
       ),
+      // Contenido con padding general
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Bloque: dirección de envío
             ValueListenableBuilder<String?>(
               valueListenable: checkout.shippingAddress,
               builder: (_, address, __) => ListTile(
@@ -38,6 +43,7 @@ class CheckoutReviewPage extends StatelessWidget {
               ),
             ),
             const Divider(),
+            // Bloque: método de pago
             ValueListenableBuilder<String?>(
               valueListenable: checkout.paymentMethod,
               builder: (_, method, __) => ListTile(
@@ -53,8 +59,10 @@ class CheckoutReviewPage extends StatelessWidget {
             ),
             const Divider(),
             const SizedBox(height: 8),
+            // Título de la lista de productos
             const Text('Productos', style: TextStyle(color: Colors.white70)),
             const SizedBox(height: 8),
+            // Lista de líneas del carrito
             Expanded(
               child: ValueListenableBuilder<List<CartLine>>(
                 valueListenable: cart.lines,
@@ -87,6 +95,7 @@ class CheckoutReviewPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            // Resumen del total
             Row(
               children: [
                 const Expanded(
@@ -102,6 +111,7 @@ class CheckoutReviewPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
+            // Botón de confirmación
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-// Formulario para agendar citas
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class AppointmentPage extends StatefulWidget {
+  const AppointmentPage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _AppointmentPageState extends State<AppointmentPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -61,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String _formatDate(DateTime? d) {
     if (d == null) return '';
     return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-    }
+  }
 
   String _formatTime(TimeOfDay? t) {
     if (t == null) return '';
@@ -99,16 +98,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Estructura base
     return Scaffold(
       backgroundColor: const Color(0xFF2D3748),
-      // Barra superior
       appBar: AppBar(
         title: const Text('Agendar cita'),
         backgroundColor: const Color(0xFF1A202C),
         foregroundColor: Colors.white,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: Icon(Icons.event_note),
+          )
+        ],
       ),
-      // Formulario con scroll para evitar overflow
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
