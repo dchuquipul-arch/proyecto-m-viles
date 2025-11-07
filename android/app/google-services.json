@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "535780785313",
+    "project_id": "naturaco-ca4e6",
+    "storage_bucket": "naturaco-ca4e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:535780785313:android:b3bf4637e610edefee04e0",
+        "android_client_info": {
+          "package_name": "com.example.hello_world"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmvH0NzJG7BYjCOC9cddlx6YH8_JTecec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

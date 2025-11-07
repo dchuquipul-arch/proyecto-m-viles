@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/models/product.dart';
-import 'package:hello_world/services/products_service.dart';
+import 'package:hello_world/services/firebase_products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 
 // Página principal del menú de productos
@@ -9,7 +9,6 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final products = ProductsService().getAll();
     final cart = CartService();
     // Estructura base de la pantalla
     return Scaffold(
@@ -97,38 +96,95 @@ class MenuPage extends StatelessWidget {
             ),
           ),
 
-          // Grid de productos
+          // Grid de productos con StreamBuilder para Firebase
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final p = products[index];
-                  // Tarjeta individual del producto
-                  return _buildProductCard(
-                    context,
-                    product: p,
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      '/product',
-                      arguments: p.id,
+            child: StreamBuilder<List<Product>>(
+              stream: FirebaseProductsService().getAllStream(),
+              builder: (context, snapshot) {
+                // Mientras carga
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
-                    onAdd: () {
-                      cart.add(p);
-                      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                        const SnackBar(content: Text('Producto agregado al carrito')),
+                  );
+                }
+                
+                // Si hay error
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.white, size: 48),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error al cargar productos',
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${snapshot.error}',
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                final products = snapshot.data ?? [];
+                
+                // Si no hay productos
+                if (products.isEmpty) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.inventory_2_outlined, color: Colors.white, size: 48),
+                        SizedBox(height: 16),
+                        Text(
+                          'No hay productos disponibles',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                // Mostrar productos
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.68,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final p = products[index];
+                      // Tarjeta individual del producto
+                      return _buildProductCard(
+                        context,
+                        product: p,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/product',
+                          arguments: p.id,
+                        ),
+                        onAdd: () {
+                          cart.add(p);
+                          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                            const SnackBar(content: Text('Producto agregado al carrito')),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],

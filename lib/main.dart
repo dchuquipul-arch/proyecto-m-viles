@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'pages/home_page.dart';
 import 'pages/menu.dart';
 import 'pages/product_detail.dart';
@@ -12,7 +13,13 @@ import 'pages/orders_history.dart';
 import 'pages/order_detail.dart';
 import 'pages/settings.dart';
 
-void main() {
+void main() async {
+  // Asegura que Flutter esté inicializado
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializa Firebase
+  await Firebase.initializeApp();
+  
   runApp(const MyApp());
 }
 

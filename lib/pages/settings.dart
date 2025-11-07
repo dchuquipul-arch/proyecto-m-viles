@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/services/checkout_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/services/orders_service.dart';
+import 'package:hello_world/utils/migrate_data.dart';
 
 // Pantalla de configuración y datos locales
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _isMigrating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -201,9 +209,92 @@ class SettingsPage extends StatelessWidget {
             },
           ),
 
+          // Encabezado: Firebase
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
+            child: Text('Firebase',
+                style: TextStyle(color: Colors.white70, fontSize: 13)),
+          ),
+
+          // Acción: Migrar productos a Firebase (solo una vez)
+          ListTile(
+            title: const Text('Migrar productos a Firebase',
+                style: TextStyle(color: Colors.white)),
+            subtitle: const Text(
+                'Sube los productos iniciales a Firebase (ejecutar solo una vez)',
+                style: TextStyle(color: Colors.white70)),
+            trailing: _isMigrating
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.cloud_upload, color: Colors.white70),
+            onTap: _isMigrating ? null : _migrateProducts,
+          ),
+
           const SizedBox(height: 12),
         ],
       ),
     );
+  }
+
+  Future<void> _migrateProducts() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Migrar productos a Firebase'),
+        content: const Text(
+          '¿Deseas subir los productos iniciales a Firebase?\n\n'
+          'IMPORTANTE: Solo ejecuta esto UNA vez. Si ya tienes productos en Firebase, '
+          'se duplicarán.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Migrar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isMigrating = true);
+
+    try {
+      await DataMigration.migrateProducts();
+      
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Productos migrados exitosamente a Firebase'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Error al migrar productos: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isMigrating = false);
+      }
+    }
   }
 }

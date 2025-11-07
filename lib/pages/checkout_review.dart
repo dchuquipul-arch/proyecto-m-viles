@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/services/checkout_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/models/order.dart';
-import 'package:hello_world/services/orders_service.dart';
+import 'package:hello_world/services/firebase_orders_service.dart';
 
 // Checkout: pantalla de revisión antes de confirmar
-class CheckoutReviewPage extends StatelessWidget {
+class CheckoutReviewPage extends StatefulWidget {
   const CheckoutReviewPage({super.key});
+
+  @override
+  State<CheckoutReviewPage> createState() => _CheckoutReviewPageState();
+}
+
+class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -115,32 +122,82 @@ class CheckoutReviewPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  if (cart.lines.value.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('El carrito está vacío')),
-                    );
-                    return;
-                  }
-                  final id = DateTime.now().millisecondsSinceEpoch.toString();
-                  final order = Order.fromCart(
-                    id: id,
-                    lines: cart.lines.value,
-                    total: cart.total(),
-                    address: checkout.shippingAddress.value,
-                    payment: checkout.paymentMethod.value,
-                  );
-                  OrdersService().add(order);
-                  Navigator.pushNamed(context, '/order/confirmation');
-                  cart.clear();
-                  checkout.clear();
-                },
-                child: const Text('Confirmar pedido'),
+                onPressed: _isProcessing ? null : () => _confirmOrder(cart, checkout),
+                child: _isProcessing
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Confirmar pedido'),
               ),
             )
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmOrder(CartService cart, CheckoutService checkout) async {
+    if (cart.lines.value.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El carrito está vacío')),
+      );
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+
+    try {
+      // Crear orden temporal sin ID (Firebase lo genera)
+      final order = Order.fromCart(
+        id: 'temp', // Firebase reemplazará esto con el ID real
+        lines: cart.lines.value,
+        total: cart.total(),
+        address: checkout.shippingAddress.value,
+        payment: checkout.paymentMethod.value,
+      );
+
+      // Guardar en Firebase
+      final orderId = await FirebaseOrdersService().createOrder(order);
+
+      if (!mounted) return;
+
+      if (orderId != null) {
+        // Éxito: limpiar carrito y checkout
+        cart.clear();
+        checkout.clear();
+        
+        // Navegar a confirmación
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/order/confirmation',
+          (route) => route.settings.name == '/menu',
+        );
+      } else {
+        // Error al crear orden
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al procesar el pedido. Intenta nuevamente.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    }
   }
 }

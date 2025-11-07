@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hello_world/models/appointment.dart';
+import 'package:hello_world/services/firebase_appointments_service.dart';
 
 class AppointmentPage extends StatefulWidget {
   const AppointmentPage({super.key});
@@ -69,7 +71,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return '$h:$m';
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final valid = _formKey.currentState?.validate() ?? false;
     if (!valid || _service == null || _date == null || _time == null) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
@@ -78,22 +80,50 @@ class _AppointmentPageState extends State<AppointmentPage> {
       return;
     }
 
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(
-        content: Text('Cita agendada: $_service, ${_formatDate(_date)} ${_formatTime(_time)}'),
-      ),
+    // Crear la cita
+    final appointment = Appointment(
+      id: '', // Firebase genera el ID
+      name: _nameCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
+      service: _service!,
+      date: _date!,
+      time: _formatTime(_time),
+      notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
     );
 
-    _formKey.currentState?.reset();
-    setState(() {
-      _service = null;
-      _date = null;
-      _time = null;
-    });
-    _nameCtrl.clear();
-    _phoneCtrl.clear();
-    _emailCtrl.clear();
-    _notesCtrl.clear();
+    // Guardar en Firebase
+    final appointmentId = await FirebaseAppointmentsService().createAppointment(appointment);
+    
+    if (!mounted) return;
+    
+    if (appointmentId != null) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text('Cita agendada exitosamente: ${_formatDate(_date)} ${_formatTime(_time)}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Limpiar formulario
+      _formKey.currentState?.reset();
+      setState(() {
+        _service = null;
+        _date = null;
+        _time = null;
+      });
+      _nameCtrl.clear();
+      _phoneCtrl.clear();
+      _emailCtrl.clear();
+      _notesCtrl.clear();
+    } else {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(
+          content: Text('Error al agendar la cita. Intenta nuevamente.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
