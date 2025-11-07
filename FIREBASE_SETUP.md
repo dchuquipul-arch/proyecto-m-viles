@@ -176,9 +176,18 @@ Después de ejecutar la app:
 - Verifica en Firebase Console que los productos existan
 - Verifica las reglas de Firestore (deben permitir lectura)
 
-### Error de permisos en Firestore
-Configura reglas de prueba en Firestore (Firebase Console → Firestore → Reglas):
-```
+### Error de permisos en Firestore (COMÚN)
+
+**ERROR:** `PERMISSION_DENIED - Missing or insufficient permissions`
+
+**SOLUCIÓN:**
+
+1. Ve a [Firebase Console](https://console.firebase.google.com/)
+2. Selecciona tu proyecto
+3. Ve a **Firestore Database** → **Reglas** (Rules)
+4. Reemplaza las reglas actuales con:
+
+```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -188,6 +197,11 @@ service cloud.firestore {
   }
 }
 ```
+
+5. Haz clic en **"Publicar"** (Publish)
+6. Las reglas se aplican inmediatamente
+
+**📖 Ver guía detallada:** `FIRESTORE_REGLAS.md`
 
 ---
 

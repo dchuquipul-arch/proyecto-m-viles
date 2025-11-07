@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/services/checkout_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/services/orders_service.dart';
+import 'package:hello_world/services/auth_service.dart';
 import 'package:hello_world/utils/migrate_data.dart';
 
 // Pantalla de configuración y datos locales
@@ -14,12 +15,14 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _isMigrating = false;
+  final _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     final checkout = CheckoutService();
     final cart = CartService();
     final orders = OrdersService();
+    final user = _authService.currentUser;
 
     // Estructura base
     return Scaffold(
@@ -34,9 +37,85 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          // Encabezado: cuenta de compra
+          // Sección de perfil de usuario
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A202C),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                // Avatar del usuario
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.green.shade700,
+                  backgroundImage: user?.photoURL != null
+                      ? NetworkImage(user!.photoURL!)
+                      : null,
+                  child: user?.photoURL == null
+                      ? Text(
+                          user?.displayName?.substring(0, 1).toUpperCase() ??
+                              user?.email?.substring(0, 1).toUpperCase() ??
+                              'U',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                // Información del usuario
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user?.displayName ?? 'Usuario',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        user?.email ?? '',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Encabezado: cuenta
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text('Cuenta',
+                style: TextStyle(color: Colors.white70, fontSize: 13)),
+          ),
+
+          // Botón de cerrar sesión
+          ListTile(
+            title: const Text('Cerrar sesión',
+                style: TextStyle(color: Colors.white)),
+            subtitle: const Text('Salir de tu cuenta',
+                style: TextStyle(color: Colors.white70)),
+            trailing: const Icon(Icons.logout, color: Colors.white70),
+            onTap: _signOut,
+          ),
+
+          // Encabezado: cuenta de compra
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text('Cuenta de compra',
                 style: TextStyle(color: Colors.white70, fontSize: 13)),
           ),
@@ -236,6 +315,8 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: _isMigrating ? null : _migrateProducts,
           ),
 
+          
+
           const SizedBox(height: 12),
         ],
       ),
@@ -295,6 +376,77 @@ class _SettingsPageState extends State<SettingsPage> {
       if (mounted) {
         setState(() => _isMigrating = false);
       }
+    }
+  }
+
+  Future<void> _signOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Estás seguro que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Mostrar indicador de carga
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text('Cerrando sesión...'),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Cerrar sesión en Firebase
+      await _authService.signOut();
+      
+      if (!mounted) return;
+      
+      // El AuthWrapper detectará automáticamente que no hay usuario
+      // y redirigirá a LoginPage, pero navegamos manualmente para limpiar el stack
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cerrar sesión: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 }
