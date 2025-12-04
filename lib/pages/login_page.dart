@@ -117,33 +117,38 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.green.shade50,
-              Colors.white,
-            ],
+      body: Stack(
+        children: [
+          // Imagen de fondo a pantalla completa
+          Positioned.fill(
+            child: Image.network(
+              'https://i.pinimg.com/736x/b2/49/9f/b2499f35033dfbb9bfb5dcb355f18316.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo o ícono
-                    Icon(
-                      Icons.eco,
-                      size: 80,
-                      color: Colors.green.shade700,
-                    ),
+          // Overlay oscuro para mejorar legibilidad de textos/botones
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: Colors.black45),
+            ),
+          ),
+          // Contenido del login
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Logo o ícono
+                      Icon(
+                        Icons.eco,
+                        size: 80,
+                        color: Colors.white,
+                      ),
                     const SizedBox(height: 16),
                     
                     // Título
@@ -151,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                       'Natura Co',
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.green.shade800,
+                        color: Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -159,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'Bienvenido de vuelta',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.grey.shade600,
+                        color: Colors.white70,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -233,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: _isLoading ? null : _resetPassword,
                         child: Text(
                           '¿Olvidaste tu contraseña?',
-                          style: TextStyle(color: Colors.green.shade700),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
@@ -321,7 +326,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         Text(
                           '¿No tienes cuenta? ',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: TextStyle(color: Colors.white70),
                         ),
                         TextButton(
                           onPressed: _isLoading
@@ -332,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'Regístrate',
                             style: TextStyle(
-                              color: Colors.green.shade700,
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -344,7 +349,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        ),
+          ),
+        ],
       ),
     );
   }

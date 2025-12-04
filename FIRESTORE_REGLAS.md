@@ -204,3 +204,8 @@ Una vez que las reglas estén configuradas:
 - [Testing de Reglas](https://firebase.google.com/docs/firestore/security/test-rules-emulator)
 
 
+
+
+
+
+
