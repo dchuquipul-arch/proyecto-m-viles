@@ -31,7 +31,7 @@ Ve a: https://console.firebase.google.com/
 1. En el proyecto de Firebase, haz clic en el ícono **Android**
 2. Ingresa este Package Name EXACTO:
    ```
-   com.example.hello_world
+   natura.co
    ```
 3. Nombre de app (opcional): `Natura CO`
 4. Haz clic en "Registrar app"
@@ -137,7 +137,7 @@ Cuando la app esté ejecutando:
 **Solución:**
 - Descarga el archivo desde Firebase Console
 - Colócalo en la ubicación correcta
-- Verifica que el packageName sea `com.example.hello_world`
+- Verifica que el packageName sea `natura.co`
 
 ### ❌ No se cargan los productos (pantalla vacía)
 

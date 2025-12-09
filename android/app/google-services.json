@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:535780785313:android:b3bf4637e610edefee04e0",
+        "mobilesdk_app_id": "1:535780785313:android:4ed2250b1a8c1c88ee04e0",
         "android_client_info": {
-          "package_name": "com.example.hello_world"
+          "package_name": "natura.co"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "535780785313-aming9c4e9n6jukn4rd1gc9rrvhl7ma4.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.hello_world",
-            "certificate_hash": "9e5f58d3ddd075df717dbeacf906deff3556dd31"
-          }
-        },
         {
           "client_id": "535780785313-mb0phqqru9hmn0cbi6i73s5kqrcg12h9.apps.googleusercontent.com",
           "client_type": 3

@@ -1,4 +1,4 @@
-package com.example.hello_world
+package natura.co
 
 import io.flutter.embedding.android.FlutterActivity
 

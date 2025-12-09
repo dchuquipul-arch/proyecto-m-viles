@@ -94,7 +94,7 @@ SHA-256: XXXX...
 2. Selecciona tu proyecto
 3. Haz clic en el ícono de **configuración** (⚙️) → **Configuración del proyecto**
 4. Desplázate a la sección **"Tus apps"**
-5. Selecciona tu app Android (`com.example.hello_world`)
+5. Selecciona tu app Android (`natura.co`)
 6. En la sección **"Huellas digitales de certificado SHA"**, haz clic en **"Agregar huella digital"**
 7. Pega el **SHA-1** que copiaste
 8. Haz clic en **"Guardar"**
@@ -122,7 +122,7 @@ Tu archivo `android/app/build.gradle.kts` ya está configurado con:
 ```kotlin
 android {
     defaultConfig {
-        applicationId = "com.example.hello_world"
+        applicationId = "natura.co"
         minSdk = 21  // ✅ Requerido para Google Sign-In
         ...
     }

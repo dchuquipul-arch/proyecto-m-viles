@@ -8,7 +8,7 @@
       https://console.firebase.google.com/
 
 - [ ] **2. Agregar app Android**
-      - Package name: `com.example.hello_world`
+      - Package name: `natura.co`
       - Descargar `google-services.json`
 
 - [ ] **3. Copiar google-services.json a:**

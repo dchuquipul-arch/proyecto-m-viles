@@ -4,186 +4,157 @@ import 'package:hello_world/services/firebase_products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/services/auth_service.dart';
 
-// Página principal del menú de productos
+// Página principal del menú de productos mejorada
 class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final cart = CartService();
-    // Estructura base de la pantalla
+
+    // Diseño Premium: Fondo claro y limpio
     return Scaffold(
-      backgroundColor: const Color(0xFF2D3748),
-      // Barra superior con título y acceso al carrito
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: const Text('Natura CO'),
-        backgroundColor: const Color(0xFF1A202C),
-        foregroundColor: Colors.white,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: const Text(
+          'Natura CO',
+          style: TextStyle(
+            color: Color(0xFF1A202C),
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            letterSpacing: -0.5,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Color(0xFF1A202C)),
         actions: [
-          // Escucha cambios del carrito para mostrar el contador
           ValueListenableBuilder<List<CartLine>>(
             valueListenable: cart.lines,
             builder: (context, lines, _) {
               final count = cart.itemsCount();
-              // Icono del carrito con badge de cantidad
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart),
-                    onPressed: () => Navigator.pushNamed(context, '/cart'),
-                  ),
-                  if (count > 0)
-                    Positioned(
-                      right: 6,
-                      top: 6,
-                      child: CircleAvatar(
-                        radius: 9,
-                        backgroundColor: Colors.redAccent,
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(fontSize: 11, color: Colors.white),
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shopping_bag_outlined, size: 28),
+                      onPressed: () => Navigator.pushNamed(context, '/cart'),
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE53E3E),
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    )
-                ],
+                  ],
+                ),
               );
             },
-          )
+          ),
         ],
       ),
-      // Menú lateral compacto
       drawer: _buildCompactDrawer(context),
-      // Contenido principal: buscador + grilla de productos
       body: Column(
         children: [
-          // Barra de búsqueda
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 480),
-                child: Container(
-                  height: 44,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 8,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
+          // Barra de búsqueda moderna
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEDF2F7),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const TextField(
+                cursorColor: Color(0xFF2D3748),
+                textAlignVertical: TextAlignVertical.center,
+                style: TextStyle(
+                  color: Color(0xFF2D3748),
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFFA0AEC0),
                   ),
-                  // Campo de texto para buscar productos
-                  child: const TextField(
-                    cursorColor: Color(0xFF2D3748),
-                    textAlignVertical: TextAlignVertical.center,
-                    style: TextStyle(color: Color(0xFF2D3748)),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Buscar...',
-                      hintStyle: TextStyle(color: Color(0xFF718096)),
-                      prefixIcon: Icon(Icons.search, color: Color(0xFF718096)),
-                      prefixIconConstraints: BoxConstraints(minWidth: 44),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                  ),
+                  hintText: '¿Qué estás buscando hoy?',
+                  hintStyle: TextStyle(color: Color(0xFFA0AEC0)),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                  isCollapsed: false,
                 ),
               ),
             ),
           ),
 
-          // Grid de productos con StreamBuilder para Firebase
+          // Grid de productos
           Expanded(
             child: StreamBuilder<List<Product>>(
               stream: FirebaseProductsService().getAllStream(),
               builder: (context, snapshot) {
-                // Mientras carga
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
-                
-                // Si hay error
+
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.white, size: 48),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error al cargar productos',
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${snapshot.error}',
-                          style: const TextStyle(color: Colors.white70, fontSize: 12),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 final products = snapshot.data ?? [];
-                
-                // Si no hay productos
+
                 if (products.isEmpty) {
                   return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inventory_2_outlined, color: Colors.white, size: 48),
+                        Icon(Icons.spa_outlined, size: 60, color: Colors.grey),
                         SizedBox(height: 16),
                         Text(
                           'No hay productos disponibles',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          style: TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
                   );
                 }
-                
-                // Mostrar productos
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.68,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final p = products[index];
-                      // Tarjeta individual del producto
-                      return _buildProductCard(
-                        context,
-                        product: p,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          '/product',
-                          arguments: p.id,
-                        ),
-                        onAdd: () {
-                          cart.add(p);
-                          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                            const SnackBar(content: Text('Producto agregado al carrito')),
-                          );
-                        },
-                      );
-                    },
+
+                return GridView.builder(
+                  padding: const EdgeInsets.all(20),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: 0.65, // Más alto para mejor imagen
                   ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final p = products[index];
+                    return _buildProductCard(context, product: p, cart: cart);
+                  },
                 );
               },
             ),
@@ -193,184 +164,201 @@ class MenuPage extends StatelessWidget {
     );
   }
 
-  // Drawer lateral compacto con accesos rápidos
   Widget _buildCompactDrawer(BuildContext context) {
-    return SizedBox(
-      width: 80,
-      child: Drawer(
-        backgroundColor: const Color(0xFF1A202C),
+    return Drawer(
+      width: 90,
+      backgroundColor: const Color(0xFF1A202C),
+      child: SafeArea(
         child: Column(
           children: [
-            Container(
-              height: 120,
-              padding: const EdgeInsets.all(16),
-              child: const Column(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.spa,
-                      size: 20,
-                      color: Color(0xFF1A202C),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'DB',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 20),
+            const CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.white,
+              child: Icon(Icons.spa, color: Color(0xFF1A202C)),
             ),
-
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Inicio
-                  _buildCompactDrawerItem(
-                    icon: Icons.home,
-                    isSelected: true,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  // Carrito
-                  _buildCompactDrawerItem(
-                    icon: Icons.shopping_cart,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/cart');
-                    },
-                  ),
-                  // Perfil
-                  _buildCompactDrawerItem(
-                    icon: Icons.people,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/appointment');
-                    },
-                  ),
-                  // Órdenes
-                  _buildCompactDrawerItem(
-                    icon: Icons.analytics,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/orders');
-                    },
-                  ),
-                ],
-              ),
+            const SizedBox(height: 40),
+            _DrawerItem(
+              icon: Icons.home_rounded,
+              isSelected: true,
+              onTap: () => Navigator.pop(context),
             ),
-
-            Column(
-              children: [
-                // Ajustes
-                _buildCompactDrawerItem(
-                  icon: Icons.settings,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/settings');
-                  },
-                ),
-                // Cerrar sesión
-                _buildCompactDrawerItem(
-                  icon: Icons.exit_to_app,
-                  onTap: () => _showLogoutDialog(context),
-                ),
-                const SizedBox(height: 20),
-              ],
+            _DrawerItem(
+              icon: Icons.shopping_bag_outlined,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/cart');
+              },
             ),
+            _DrawerItem(
+              icon: Icons.person_outline,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/appointment');
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.analytics_outlined,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/orders');
+              },
+            ),
+            const Spacer(),
+            _DrawerItem(
+              icon: Icons.settings_outlined,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/settings');
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.logout_rounded,
+              onTap: () => _showLogoutDialog(context),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // Item del drawer con estado de selección
-  Widget _buildCompactDrawerItem({
-    required IconData icon,
-    bool isSelected = false,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      width: 48,
-      height: 48,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: IconButton(
-        icon: Icon(icon,
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-            size: 20),
-        onPressed: onTap,
-        style: IconButton.styleFrom(
-          backgroundColor: isSelected ? const Color(0xFF2D3748) : Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Tarjeta visual para cada producto en el grid
   Widget _buildProductCard(
     BuildContext context, {
     required Product product,
-    required VoidCallback onTap,
-    required VoidCallback onAdd,
+    required CartService cart,
   }) {
-    // Navega al detalle al tocar
     return GestureDetector(
-      onTap: onTap,
+      onTap: () =>
+          Navigator.pushNamed(context, '/product', arguments: product.id),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1A202C).withOpacity(0.06),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 100,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                image: DecorationImage(
-                  image: NetworkImage(product.imageUrl),
-                  fit: BoxFit.cover,
+            // Imagen con estilo
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  color: const Color(0xFFF7FAFC),
+                  image: DecorationImage(
+                    image: NetworkImage(product.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
+                          ),
+                          icon: const Icon(
+                            Icons.favorite_border,
+                            size: 20,
+                            color: Color(0xFFA0AEC0),
+                          ),
+                          onPressed: () {}, // Funcionalidad futura
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            
+
+            // Información
             Padding(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'S/ ${product.price.toStringAsFixed(2)}',
+                    product.category.toUpperCase(),
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D3748),
+                      fontSize: 10,
+                      color: Color(0xFF718096),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     product.name,
                     style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF4A5568),
-                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF2D3748),
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
                     ),
                     maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 8),
-                  // Botón para agregar al carrito
-                  _AddButton(onPressed: onAdd),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'S/ ${product.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          cart.add(product);
+                          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                            SnackBar(
+                              content: const Text('Agregado al carrito'),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              backgroundColor: const Color(0xFF2D3748),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2D3748),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -381,64 +369,40 @@ class MenuPage extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    Navigator.pop(context);
     showDialog(
       context: context,
-      // Diálogo de confirmación de cierre de sesión
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Cerrar Sesión'),
-        content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+        content: const Text('¿Estás seguro de que deseas salir?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE53E3E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
             onPressed: () async {
               Navigator.pop(context);
-              
-              // Mostrar indicador de carga
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Row(
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      Text('Cerrando sesión...'),
-                    ],
-                  ),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              
-              try {
-                // Cerrar sesión en Firebase y Google
-                await AuthService().signOut();
-                
-                // Navegar a la pantalla inicial
-                if (context.mounted) {
-                  Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error al cerrar sesión: $e'),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
-                }
+              await AuthService().signOut();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
               }
             },
-            child: const Text('Cerrar Sesión'),
+            child: const Text(
+              'Cerrar Sesión',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -446,27 +410,33 @@ class MenuPage extends StatelessWidget {
   }
 }
 
-// Botón reutilizable para agregar productos al carrito
-class _AddButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  const _AddButton({required this.onPressed});
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isSelected;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.onTap,
+    this.isSelected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 30,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2D3748),
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: IconButton(
+        onPressed: onTap,
+        icon: Icon(
+          icon,
+          color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+          size: 24,
         ),
-        onPressed: onPressed,
-        child: const Text(
-          'Agregar',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        style: IconButton.styleFrom(
+          backgroundColor: isSelected
+              ? Colors.white.withOpacity(0.1)
+              : Colors.transparent,
+          padding: const EdgeInsets.all(12),
         ),
       ),
     );

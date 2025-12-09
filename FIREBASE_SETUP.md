@@ -24,13 +24,13 @@ Ya se han implementado los siguientes cambios en tu aplicación:
 
 ### 1. Descargar `google-services.json` desde Firebase Console
 
-**Tu packageName es:** `com.example.hello_world`
+**Tu packageName es:** `natura.co`
 
 #### Pasos:
 1. Ve a [Firebase Console](https://console.firebase.google.com/)
 2. Crea un nuevo proyecto o usa uno existente
 3. Haz clic en el ícono de Android para agregar una app Android
-4. Ingresa el nombre del paquete: `com.example.hello_world`
+4. Ingresa el nombre del paquete: `natura.co`
 5. Descarga el archivo `google-services.json`
 6. **IMPORTANTE:** Coloca el archivo en esta ubicación exacta:
    ```
