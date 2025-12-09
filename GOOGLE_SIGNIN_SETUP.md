@@ -60,11 +60,18 @@ Ya se han realizado los siguientes cambios en tu aplicación:
 
 Para que Google Sign-In funcione, necesitas registrar la huella digital SHA-1 de tu aplicación:
 
-#### En Linux/Mac:
+#### Opción A - Con Gradle (Recomendado):
 ```bash
 cd /home/benji/flutter_apps/proyecto-m-viles/android
 ./gradlew signingReport
 ```
+
+#### Opción B - Con keytool (Más rápido):
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+```
+
+**💡 Nota:** La Opción B es especialmente útil cuando otra persona necesita generar su propia huella SHA-1 para añadirla a tu proyecto de Firebase sin necesidad de ejecutar Gradle.
 
 #### Busca en la salida:
 ```

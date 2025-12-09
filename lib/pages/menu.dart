@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/models/product.dart';
 import 'package:hello_world/services/firebase_products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
+import 'package:hello_world/services/auth_service.dart';
 
 // Página principal del menú de productos
 class MenuPage extends StatelessWidget {
@@ -393,9 +394,49 @@ class MenuPage extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              
+              // Mostrar indicador de carga
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Text('Cerrando sesión...'),
+                    ],
+                  ),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              
+              try {
+                // Cerrar sesión en Firebase y Google
+                await AuthService().signOut();
+                
+                // Navegar a la pantalla inicial
+                if (context.mounted) {
+                  Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error al cerrar sesión: $e'),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              }
             },
             child: const Text('Cerrar Sesión'),
           ),

@@ -85,7 +85,8 @@ class AuthWrapper extends StatelessWidget {
 
         // Si el usuario está autenticado, mostrar la página principal
         if (snapshot.hasData) {
-          return const MyHomePage();
+          // return const MyHomePage();
+          return const MenuPage();
         }
 
         // Si no está autenticado, mostrar la página de login
