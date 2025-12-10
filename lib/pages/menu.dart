@@ -4,9 +4,16 @@ import 'package:hello_world/services/firebase_products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/services/auth_service.dart';
 
-// Página principal del menú de productos mejorada
-class MenuPage extends StatelessWidget {
+// Página principal del menú de productos con búsqueda funcional
+class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
+
+  @override
+  State<MenuPage> createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -89,14 +96,19 @@ class MenuPage extends StatelessWidget {
                 color: const Color(0xFFEDF2F7),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: const TextField(
-                cursorColor: Color(0xFF2D3748),
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+                cursorColor: const Color(0xFF2D3748),
                 textAlignVertical: TextAlignVertical.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF2D3748),
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(
                     Icons.search_rounded,
                     color: Color(0xFFA0AEC0),
@@ -126,16 +138,30 @@ class MenuPage extends StatelessWidget {
 
                 final products = snapshot.data ?? [];
 
-                if (products.isEmpty) {
-                  return const Center(
+                // Filtrado de productos
+                final filteredProducts = products.where((product) {
+                  final nameLower = product.name.toLowerCase();
+                  final categoryLower = product.category.toLowerCase();
+                  return nameLower.contains(_searchQuery) ||
+                      categoryLower.contains(_searchQuery);
+                }).toList();
+
+                if (filteredProducts.isEmpty) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.spa_outlined, size: 60, color: Colors.grey),
-                        SizedBox(height: 16),
+                        const Icon(
+                          Icons.search_off_rounded,
+                          size: 60,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
                         Text(
-                          'No hay productos disponibles',
-                          style: TextStyle(color: Colors.grey),
+                          _searchQuery.isEmpty
+                              ? 'No hay productos disponibles'
+                              : 'No encontramos resultados para "$_searchQuery"',
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
@@ -150,9 +176,9 @@ class MenuPage extends StatelessWidget {
                     mainAxisSpacing: 20,
                     childAspectRatio: 0.65, // Más alto para mejor imagen
                   ),
-                  itemCount: products.length,
+                  itemCount: filteredProducts.length,
                   itemBuilder: (context, index) {
-                    final p = products[index];
+                    final p = filteredProducts[index];
                     return _buildProductCard(context, product: p, cart: cart);
                   },
                 );
