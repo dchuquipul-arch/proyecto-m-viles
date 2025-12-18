@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/services/checkout_service.dart';
 import 'package:hello_world/services/cart_service.dart';
-import 'package:hello_world/services/orders_service.dart';
+
 import 'package:hello_world/services/auth_service.dart';
 import 'package:hello_world/utils/migrate_data.dart';
 
@@ -21,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final checkout = CheckoutService();
     final cart = CartService();
-    final orders = OrdersService();
+
     final user = _authService.currentUser;
 
     // Estructura base
@@ -99,16 +99,22 @@ class _SettingsPageState extends State<SettingsPage> {
           // Encabezado: cuenta
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Text('Cuenta',
-                style: TextStyle(color: Colors.white70, fontSize: 13)),
+            child: Text(
+              'Cuenta',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
           ),
 
           // Botón de cerrar sesión
           ListTile(
-            title: const Text('Cerrar sesión',
-                style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Salir de tu cuenta',
-                style: TextStyle(color: Colors.white70)),
+            title: const Text(
+              'Cerrar sesión',
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: const Text(
+              'Salir de tu cuenta',
+              style: TextStyle(color: Colors.white70),
+            ),
             trailing: const Icon(Icons.logout, color: Colors.white70),
             onTap: _signOut,
           ),
@@ -116,18 +122,24 @@ class _SettingsPageState extends State<SettingsPage> {
           // Encabezado: cuenta de compra
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text('Cuenta de compra',
-                style: TextStyle(color: Colors.white70, fontSize: 13)),
+            child: Text(
+              'Cuenta de compra',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
           ),
 
           // Dirección de envío editable mediante diálogo
           ValueListenableBuilder<String?>(
             valueListenable: checkout.shippingAddress,
             builder: (context, address, _) => ListTile(
-              title: const Text('Dirección de envío',
-                  style: TextStyle(color: Colors.white)),
-              subtitle: Text(address ?? 'No especificada',
-                  style: const TextStyle(color: Colors.white70)),
+              title: const Text(
+                'Dirección de envío',
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: Text(
+                address ?? 'No especificada',
+                style: const TextStyle(color: Colors.white70),
+              ),
               trailing: const Icon(Icons.edit, color: Colors.white70),
               onTap: () async {
                 final controller = TextEditingController(text: address ?? '');
@@ -139,7 +151,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     content: TextField(
                       controller: controller,
                       decoration: const InputDecoration(
-                          hintText: 'Calle 123, Ciudad, País'),
+                        hintText: 'Calle 123, Ciudad, País',
+                      ),
                     ),
                     actions: [
                       TextButton(
@@ -169,13 +182,21 @@ class _SettingsPageState extends State<SettingsPage> {
           ValueListenableBuilder<String?>(
             valueListenable: checkout.paymentMethod,
             builder: (context, method, _) => ListTile(
-              title: const Text('Método de pago preferido',
-                  style: TextStyle(color: Colors.white)),
-              subtitle: Text(method ?? 'No seleccionado',
-                  style: const TextStyle(color: Colors.white70)),
+              title: const Text(
+                'Método de pago preferido',
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: Text(
+                method ?? 'No seleccionado',
+                style: const TextStyle(color: Colors.white70),
+              ),
               trailing: const Icon(Icons.credit_card, color: Colors.white70),
               onTap: () async {
-                final options = const ['Tarjeta', 'Yape/Plin', 'Contra entrega'];
+                final options = const [
+                  'Tarjeta',
+                  'Yape/Plin',
+                  'Contra entrega',
+                ];
                 final selected = await showModalBottomSheet<String>(
                   context: context,
                   backgroundColor: const Color(0xFF1A202C),
@@ -185,14 +206,19 @@ class _SettingsPageState extends State<SettingsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const SizedBox(height: 8),
-                        const Text('Selecciona un método',
-                            style: TextStyle(color: Colors.white70)),
-                        ...options.map((o) => ListTile(
-                              title: Text(o,
-                                  style:
-                                      const TextStyle(color: Colors.white)),
-                              onTap: () => Navigator.pop(ctx, o),
-                            )),
+                        const Text(
+                          'Selecciona un método',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        ...options.map(
+                          (o) => ListTile(
+                            title: Text(
+                              o,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            onTap: () => Navigator.pop(ctx, o),
+                          ),
+                        ),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -211,16 +237,22 @@ class _SettingsPageState extends State<SettingsPage> {
           // Encabezado: datos y almacenamiento
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text('Datos y almacenamiento',
-                style: TextStyle(color: Colors.white70, fontSize: 13)),
+            child: Text(
+              'Datos y almacenamiento',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
           ),
 
           // Acción: vaciar carrito con confirmación
           ListTile(
-            title: const Text('Vaciar carrito',
-                style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Elimina todos los productos del carrito',
-                style: TextStyle(color: Colors.white70)),
+            title: const Text(
+              'Vaciar carrito',
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: const Text(
+              'Elimina todos los productos del carrito',
+              style: TextStyle(color: Colors.white70),
+            ),
             trailing: const Icon(Icons.delete_outline, color: Colors.white70),
             onTap: () async {
               final ok = await showDialog<bool>(
@@ -229,7 +261,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 builder: (ctx) => AlertDialog(
                   title: const Text('Vaciar carrito'),
                   content: const Text(
-                      '¿Seguro que deseas eliminar todos los productos del carrito?'),
+                    '¿Seguro que deseas eliminar todos los productos del carrito?',
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
@@ -251,57 +284,25 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
 
-          // Acción: borrar historial de pedidos con confirmación
-          ListTile(
-            title: const Text('Borrar historial de pedidos',
-                style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Elimina todos los pedidos locales',
-                style: TextStyle(color: Colors.white70)),
-            trailing: const Icon(Icons.history_toggle_off,
-                color: Colors.white70),
-            onTap: () async {
-              final ok = await showDialog<bool>(
-                context: context,
-                // Diálogo de confirmación
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Borrar historial'),
-                  content: const Text(
-                      '¿Seguro que deseas eliminar todos los pedidos guardados en este dispositivo?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Borrar'),
-                    ),
-                  ],
-                ),
-              );
-              if (ok == true) {
-                orders.orders.value = [];
-                ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                  const SnackBar(content: Text('Historial de pedidos borrado')),
-                );
-              }
-            },
-          ),
-
           // Encabezado: Firebase
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text('Firebase',
-                style: TextStyle(color: Colors.white70, fontSize: 13)),
+            child: Text(
+              'Firebase',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
           ),
 
           // Acción: Migrar productos a Firebase (solo una vez)
           ListTile(
-            title: const Text('Migrar productos a Firebase',
-                style: TextStyle(color: Colors.white)),
+            title: const Text(
+              'Migrar productos a Firebase',
+              style: TextStyle(color: Colors.white),
+            ),
             subtitle: const Text(
-                'Sube los productos iniciales a Firebase (ejecutar solo una vez)',
-                style: TextStyle(color: Colors.white70)),
+              'Sube los productos iniciales a Firebase (ejecutar solo una vez)',
+              style: TextStyle(color: Colors.white70),
+            ),
             trailing: _isMigrating
                 ? const SizedBox(
                     width: 24,
@@ -314,8 +315,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 : const Icon(Icons.cloud_upload, color: Colors.white70),
             onTap: _isMigrating ? null : _migrateProducts,
           ),
-
-          
 
           const SizedBox(height: 12),
         ],
@@ -352,9 +351,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
     try {
       await DataMigration.migrateProducts();
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('✅ Productos migrados exitosamente a Firebase'),
@@ -364,7 +363,7 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('❌ Error al migrar productos: $e'),
@@ -430,16 +429,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
       // Cerrar sesión en Firebase
       await _authService.signOut();
-      
+
       if (!mounted) return;
-      
+
       // El AuthWrapper detectará automáticamente que no hay usuario
       // y redirigirá a LoginPage, pero navegamos manualmente para limpiar el stack
       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-      
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cerrar sesión: $e'),

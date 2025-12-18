@@ -3,6 +3,7 @@ import 'package:hello_world/services/checkout_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/models/order.dart';
 import 'package:hello_world/services/firebase_orders_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Checkout: pantalla de revisión antes de confirmar
 class CheckoutReviewPage extends StatefulWidget {
@@ -39,12 +40,17 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
             ValueListenableBuilder<String?>(
               valueListenable: checkout.shippingAddress,
               builder: (_, address, __) => ListTile(
-                title: const Text('Dirección de envío',
-                    style: TextStyle(color: Colors.white70)),
-                subtitle: Text(address ?? 'No especificada',
-                    style: const TextStyle(color: Colors.white)),
+                title: const Text(
+                  'Dirección de envío',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                subtitle: Text(
+                  address ?? 'No especificada',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 trailing: TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/checkout/shipping'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/checkout/shipping'),
                   child: const Text('Editar'),
                 ),
               ),
@@ -54,12 +60,17 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
             ValueListenableBuilder<String?>(
               valueListenable: checkout.paymentMethod,
               builder: (_, method, __) => ListTile(
-                title: const Text('Método de pago',
-                    style: TextStyle(color: Colors.white70)),
-                subtitle: Text(method ?? 'No seleccionado',
-                    style: const TextStyle(color: Colors.white)),
+                title: const Text(
+                  'Método de pago',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                subtitle: Text(
+                  method ?? 'No seleccionado',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 trailing: TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/checkout/payment'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/checkout/payment'),
                   child: const Text('Editar'),
                 ),
               ),
@@ -76,8 +87,11 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
                 builder: (_, lines, __) {
                   if (lines.isEmpty) {
                     return const Center(
-                        child: Text('Carrito vacío',
-                            style: TextStyle(color: Colors.white70)));
+                      child: Text(
+                        'Carrito vacío',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    );
                   }
                   return ListView.separated(
                     itemCount: lines.length,
@@ -85,15 +99,20 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
                     itemBuilder: (_, i) {
                       final l = lines[i];
                       return ListTile(
-                        title: Text(l.product.name,
-                            style: const TextStyle(color: Colors.white)),
-                        subtitle: Text('x${l.quantity}',
-                            style: const TextStyle(color: Colors.white70)),
+                        title: Text(
+                          l.product.name,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          'x${l.quantity}',
+                          style: const TextStyle(color: Colors.white70),
+                        ),
                         trailing: Text(
                           'S/ ${l.lineTotal.toStringAsFixed(2)}',
                           style: const TextStyle(
-                              color: Colors.greenAccent,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.greenAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       );
                     },
@@ -106,15 +125,21 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
             Row(
               children: [
                 const Expanded(
-                  child: Text('Total',
-                      style: TextStyle(
-                          color: Colors.white70, fontWeight: FontWeight.w500)),
+                  child: Text(
+                    'Total',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
                 Text(
                   'S/ ${cart.total().toStringAsFixed(2)}',
                   style: const TextStyle(
-                      color: Colors.greenAccent, fontWeight: FontWeight.bold),
-                )
+                    color: Colors.greenAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -122,19 +147,23 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isProcessing ? null : () => _confirmOrder(cart, checkout),
+                onPressed: _isProcessing
+                    ? null
+                    : () => _confirmOrder(cart, checkout),
                 child: _isProcessing
                     ? const SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : const Text('Confirmar pedido'),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -143,9 +172,9 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
 
   Future<void> _confirmOrder(CartService cart, CheckoutService checkout) async {
     if (cart.lines.value.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('El carrito está vacío')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('El carrito está vacío')));
       return;
     }
 
@@ -155,6 +184,7 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
       // Crear orden temporal sin ID (Firebase lo genera)
       final order = Order.fromCart(
         id: 'temp', // Firebase reemplazará esto con el ID real
+        userId: FirebaseAuth.instance.currentUser?.uid ?? 'anonymous',
         lines: cart.lines.value,
         total: cart.total(),
         address: checkout.shippingAddress.value,
@@ -170,7 +200,7 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
         // Éxito: limpiar carrito y checkout
         cart.clear();
         checkout.clear();
-        
+
         // Navegar a confirmación
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -189,10 +219,7 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) {

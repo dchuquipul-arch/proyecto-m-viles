@@ -3,6 +3,7 @@ import 'package:hello_world/models/product.dart';
 import 'package:hello_world/services/firebase_products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
 import 'package:hello_world/services/auth_service.dart';
+import 'package:hello_world/widgets/chatbot_floating_button.dart';
 
 // Página principal del menú de productos con búsqueda funcional
 class MenuPage extends StatefulWidget {
@@ -187,6 +188,7 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ],
       ),
+      floatingActionButton: const ChatbotFloatingButton(),
     );
   }
 

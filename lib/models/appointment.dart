@@ -6,10 +6,12 @@ class Appointment {
   final String service;
   final DateTime date;
   final String time; // HH:mm
+  final String userId;
   final String? notes;
 
   const Appointment({
     required this.id,
+    required this.userId,
     required this.name,
     required this.phone,
     required this.email,

@@ -23,11 +23,13 @@ class Order {
   final DateTime createdAt;
   final List<OrderItem> items;
   final double total;
+  final String userId;
   final String? shippingAddress;
   final String? paymentMethod;
 
   const Order({
     required this.id,
+    required this.userId,
     required this.createdAt,
     required this.items,
     required this.total,
@@ -38,6 +40,7 @@ class Order {
   // Crea una orden a partir de líneas del carrito
   factory Order.fromCart({
     required String id,
+    required String userId,
     required List<CartLine> lines,
     required double total,
     String? address,
@@ -45,15 +48,18 @@ class Order {
   }) {
     return Order(
       id: id,
+      userId: userId,
       createdAt: DateTime.now(),
       items: lines
-          .map((l) => OrderItem(
-                productId: l.product.id,
-                name: l.product.name,
-                imageUrl: l.product.imageUrl,
-                quantity: l.quantity,
-                unitPrice: l.product.price,
-              ))
+          .map(
+            (l) => OrderItem(
+              productId: l.product.id,
+              name: l.product.name,
+              imageUrl: l.product.imageUrl,
+              quantity: l.quantity,
+              unitPrice: l.product.price,
+            ),
+          )
           .toList(),
       total: total,
       shippingAddress: address,

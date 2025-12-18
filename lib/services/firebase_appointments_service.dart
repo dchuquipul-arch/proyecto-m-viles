@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hello_world/models/appointment.dart';
 
 class FirebaseAppointmentsService {
-  static final FirebaseAppointmentsService _instance = FirebaseAppointmentsService._internal();
+  static final FirebaseAppointmentsService _instance =
+      FirebaseAppointmentsService._internal();
   factory FirebaseAppointmentsService() => _instance;
   FirebaseAppointmentsService._internal();
 
@@ -13,6 +14,7 @@ class FirebaseAppointmentsService {
   Future<String?> createAppointment(Appointment appointment) async {
     try {
       final docRef = await _firestore.collection(_collection).add({
+        'userId': appointment.userId,
         'name': appointment.name,
         'phone': appointment.phone,
         'email': appointment.email,
@@ -37,10 +39,24 @@ class FirebaseAppointmentsService {
         .orderBy('date', descending: false)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return _appointmentFromFirestore(doc);
-      }).toList();
-    });
+          return snapshot.docs.map((doc) {
+            return _appointmentFromFirestore(doc);
+          }).toList();
+        });
+  }
+
+  // Obtener citas de un usuario específico
+  Stream<List<Appointment>> getUserAppointmentsStream(String userId) {
+    return _firestore
+        .collection(_collection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('date', descending: false)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return _appointmentFromFirestore(doc);
+          }).toList();
+        });
   }
 
   // Obtener citas (una sola vez)
@@ -49,7 +65,7 @@ class FirebaseAppointmentsService {
         .collection(_collection)
         .orderBy('date', descending: false)
         .get();
-    
+
     return snapshot.docs.map((doc) => _appointmentFromFirestore(doc)).toList();
   }
 
@@ -81,9 +97,10 @@ class FirebaseAppointmentsService {
   // Convertir documento de Firestore a Appointment
   Appointment _appointmentFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return Appointment(
       id: doc.id,
+      userId: data['userId'] as String? ?? 'anonymous',
       name: data['name'] ?? '',
       phone: data['phone'] ?? '',
       email: data['email'] ?? '',
@@ -94,4 +111,3 @@ class FirebaseAppointmentsService {
     );
   }
 }
-

@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hello_world/models/order.dart' as model;
 
 class FirebaseOrdersService {
-  static final FirebaseOrdersService _instance = FirebaseOrdersService._internal();
+  static final FirebaseOrdersService _instance =
+      FirebaseOrdersService._internal();
   factory FirebaseOrdersService() => _instance;
   FirebaseOrdersService._internal();
 
@@ -13,14 +14,19 @@ class FirebaseOrdersService {
   Future<String?> createOrder(model.Order order) async {
     try {
       final docRef = await _firestore.collection(_collection).add({
-        'items': order.items.map((item) => {
-          'productId': item.productId,
-          'name': item.name,
-          'imageUrl': item.imageUrl,
-          'quantity': item.quantity,
-          'unitPrice': item.unitPrice,
-        }).toList(),
+        'items': order.items
+            .map(
+              (item) => {
+                'productId': item.productId,
+                'name': item.name,
+                'imageUrl': item.imageUrl,
+                'quantity': item.quantity,
+                'unitPrice': item.unitPrice,
+              },
+            )
+            .toList(),
         'total': order.total,
+        'userId': order.userId,
         'shippingAddress': order.shippingAddress,
         'paymentMethod': order.paymentMethod,
         'status': 'pending',
@@ -34,17 +40,31 @@ class FirebaseOrdersService {
     }
   }
 
-  // Obtener todas las órdenes como Stream
+  // Obtener todas las órdenes como Stream (para admins posiblemente)
   Stream<List<model.Order>> getAllStream() {
     return _firestore
         .collection(_collection)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return _orderFromFirestore(doc);
-      }).toList();
-    });
+          return snapshot.docs.map((doc) {
+            return _orderFromFirestore(doc);
+          }).toList();
+        });
+  }
+
+  // Obtener órdenes de un usuario específico como Stream
+  Stream<List<model.Order>> getUserOrdersStream(String userId) {
+    return _firestore
+        .collection(_collection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return _orderFromFirestore(doc);
+          }).toList();
+        });
   }
 
   // Obtener órdenes (una sola vez)
@@ -53,7 +73,7 @@ class FirebaseOrdersService {
         .collection(_collection)
         .orderBy('createdAt', descending: true)
         .get();
-    
+
     return snapshot.docs.map((doc) => _orderFromFirestore(doc)).toList();
   }
 
@@ -87,9 +107,10 @@ class FirebaseOrdersService {
   model.Order _orderFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final itemsList = data['items'] as List<dynamic>;
-    
+
     return model.Order(
       id: doc.id,
+      userId: data['userId'] as String? ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       items: itemsList.map((item) {
         return model.OrderItem(
@@ -106,4 +127,3 @@ class FirebaseOrdersService {
     );
   }
 }
-

@@ -15,14 +15,15 @@ import 'pages/order_detail.dart';
 import 'pages/settings.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
+import 'pages/chatbot_page.dart';
 
 void main() async {
   // Asegura que Flutter esté inicializado
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Inicializa Firebase
   await Firebase.initializeApp();
-  
+
   runApp(const MyApp());
 }
 
@@ -33,9 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Natura Co',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
+      theme: ThemeData(primarySwatch: Colors.green),
       home: const AuthWrapper(),
       routes: {
         '/login': (context) => const LoginPage(),
@@ -50,7 +49,8 @@ class MyApp extends StatelessWidget {
         '/appointment': (context) => const AppointmentPage(),
         '/orders': (context) => const OrdersHistoryPage(),
         '/order': (context) => const OrderDetailPage(),
-        '/settings': (context) => const SettingsPage()
+        '/settings': (context) => const SettingsPage(),
+        '/chatbot': (context) => const ChatbotPage(),
       },
     );
   }
@@ -68,18 +68,14 @@ class AuthWrapper extends StatelessWidget {
         // Esperando conexión
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         // Si hay error
         if (snapshot.hasError) {
           return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
+            body: Center(child: Text('Error: ${snapshot.error}')),
           );
         }
 

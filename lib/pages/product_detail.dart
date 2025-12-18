@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/models/product.dart';
 import 'package:hello_world/services/firebase_products_service.dart';
 import 'package:hello_world/services/cart_service.dart';
+import 'package:hello_world/services/firebase_favorites_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Pantalla de detalle de producto mejorada
 class ProductDetailPage extends StatelessWidget {
@@ -253,12 +255,37 @@ class ProductDetailPage extends StatelessWidget {
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.favorite_border,
-                    color: Color(0xFFA0AEC0),
-                  ),
-                  onPressed: () {}, // Funcionalidad futura
+                child: StreamBuilder<bool>(
+                  stream: FirebaseAuth.instance.currentUser != null
+                      ? FirebaseFavoritesService().isFavoriteStream(
+                          FirebaseAuth.instance.currentUser!.uid,
+                          product.id,
+                        )
+                      : Stream.value(false),
+                  builder: (context, snapshot) {
+                    final isFav = snapshot.data ?? false;
+                    return IconButton(
+                      icon: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                        color: isFav ? Colors.red : const Color(0xFFA0AEC0),
+                      ),
+                      onPressed: () async {
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Inicia sesión para dar like'),
+                            ),
+                          );
+                          return;
+                        }
+                        await FirebaseFavoritesService().toggleFavorite(
+                          user.uid,
+                          product.id,
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
 
