@@ -44,7 +44,7 @@ enum PaymentStatus {
 /// Modelo que representa un pago procesado
 class Payment {
   final String id;
-  final String culqiChargeId;
+  // field removed
   final int amount; // En centavos (5000 = 50.00 PEN)
   final String currency;
   final String email;
@@ -55,7 +55,6 @@ class Payment {
 
   const Payment({
     required this.id,
-    required this.culqiChargeId,
     required this.amount,
     required this.currency,
     required this.email,
@@ -75,7 +74,6 @@ class Payment {
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
       id: json['id'] as String? ?? '',
-      culqiChargeId: json['culqi_charge_id'] as String? ?? '',
       amount: json['amount'] as int? ?? 0,
       currency: json['currency'] as String? ?? 'PEN',
       email: json['email'] as String? ?? '',
@@ -92,7 +90,6 @@ class Payment {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'culqi_charge_id': culqiChargeId,
       'amount': amount,
       'currency': currency,
       'email': email,
@@ -106,7 +103,6 @@ class Payment {
   /// Crea una copia del Payment con campos modificados
   Payment copyWith({
     String? id,
-    String? culqiChargeId,
     int? amount,
     String? currency,
     String? email,
@@ -117,7 +113,6 @@ class Payment {
   }) {
     return Payment(
       id: id ?? this.id,
-      culqiChargeId: culqiChargeId ?? this.culqiChargeId,
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,
       email: email ?? this.email,

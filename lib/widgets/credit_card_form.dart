@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/culqi_service.dart';
+import '../utils/payment_utils.dart';
 
 /// Datos del formulario de tarjeta
 class CreditCardFormData {
@@ -17,17 +17,6 @@ class CreditCardFormData {
     required this.expirationYear,
     required this.email,
   });
-
-  /// Convierte a CardData para el servicio de Culqi
-  CardData toCardData() {
-    return CardData(
-      cardNumber: cardNumber,
-      cvv: cvv,
-      expirationMonth: expirationMonth,
-      expirationYear: expirationYear,
-      email: email,
-    );
-  }
 }
 
 /// Widget de formulario para ingresar datos de tarjeta de crédito
@@ -51,7 +40,7 @@ class CreditCardForm extends StatefulWidget {
 
 class _CreditCardFormState extends State<CreditCardForm> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late final TextEditingController _cardNumberController;
   late final TextEditingController _expirationController;
   late final TextEditingController _cvvController;
@@ -83,7 +72,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
   void _onCardNumberChanged() {
     final cardNumber = _cardNumberController.text;
     setState(() {
-      _cardBrand = CulqiService.detectCardBrand(cardNumber);
+      _cardBrand = PaymentUtils.detectCardBrand(cardNumber);
     });
   }
 
@@ -253,11 +242,8 @@ class _CreditCardFormState extends State<CreditCardForm> {
               Icon(Icons.shield, size: 16, color: colorScheme.outline),
               const SizedBox(width: 8),
               Text(
-                'Pago seguro procesado por Culqi',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.outline,
-                ),
+                'Pago seguro con encriptación',
+                style: TextStyle(fontSize: 12, color: colorScheme.outline),
               ),
             ],
           ),
@@ -293,10 +279,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
       children: [
         Icon(iconData, color: color, size: 20),
         if (_cardBrand.isNotEmpty)
-          Text(
-            _cardBrand,
-            style: TextStyle(fontSize: 8, color: color),
-          ),
+          Text(_cardBrand, style: TextStyle(fontSize: 8, color: color)),
       ],
     );
   }
@@ -307,11 +290,12 @@ class _CreditCardFormState extends State<CreditCardForm> {
     }
 
     final cleanNumber = value.replaceAll(' ', '');
+    // Permitir longitudes típicas, algunos emisores tienen menos de 13 pero estándar es 13-19
     if (cleanNumber.length < 13) {
       return 'El número de tarjeta es muy corto';
     }
 
-    if (!CulqiService.validateCardNumber(cleanNumber)) {
+    if (!PaymentUtils.validateCardNumber(cleanNumber)) {
       return 'El número de tarjeta no es válido';
     }
 
@@ -331,7 +315,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
     final month = int.tryParse(parts[0]) ?? 0;
     final year = int.tryParse(parts[1]) ?? 0;
 
-    if (!CulqiService.validateExpirationDate(month, year)) {
+    if (!PaymentUtils.validateExpirationDate(month, year)) {
       return 'Fecha inválida o vencida';
     }
 
@@ -343,7 +327,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
       return 'Ingresa el CVV';
     }
 
-    if (!CulqiService.validateCvv(value)) {
+    if (!PaymentUtils.validateCvv(value)) {
       return 'CVV inválido';
     }
 

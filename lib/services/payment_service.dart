@@ -19,11 +19,7 @@ class PaymentResult {
   final Payment? payment;
   final String? errorMessage;
 
-  const PaymentResult({
-    required this.success,
-    this.payment,
-    this.errorMessage,
-  });
+  const PaymentResult({required this.success, this.payment, this.errorMessage});
 
   factory PaymentResult.success(Payment payment) {
     return PaymentResult(success: true, payment: payment);
@@ -44,9 +40,9 @@ class PaymentService {
 
   PaymentService({http.Client? client}) : _client = client ?? http.Client();
 
-  /// Procesa un pago enviando el token de Culqi al backend
-  /// 
-  /// [token] - Token generado por Culqi (tkn_xxx)
+  /// Procesa un pago enviando el token de pago al backend
+  ///
+  /// [token] - Token de pago (ej: generado por el procesador de pagos)
   /// [amount] - Monto en centavos (5000 = 50.00 PEN)
   /// [email] - Email del cliente
   /// [productId] - ID del producto que se está comprando
@@ -61,9 +57,7 @@ class PaymentService {
     try {
       final response = await _client.post(
         Uri.parse('$_baseUrl/payments/'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'token': token,
           'amount': amount,
@@ -82,7 +76,8 @@ class PaymentService {
           return PaymentResult.success(payment);
         } else {
           return PaymentResult.failure(
-            responseBody['message'] as String? ?? 'El pago no pudo ser procesado.',
+            responseBody['message'] as String? ??
+                'El pago no pudo ser procesado.',
           );
         }
       } else {
@@ -104,9 +99,7 @@ class PaymentService {
     try {
       final response = await _client.get(
         Uri.parse('$_baseUrl/payments/$paymentId/'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -120,9 +113,7 @@ class PaymentService {
       }
     } catch (e) {
       if (e is PaymentException) rethrow;
-      throw PaymentException(
-        message: 'Error de conexión al obtener el pago.',
-      );
+      throw PaymentException(message: 'Error de conexión al obtener el pago.');
     }
   }
 
@@ -131,9 +122,7 @@ class PaymentService {
     try {
       final response = await _client.get(
         Uri.parse('$_baseUrl/payments/user/$userId/'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {

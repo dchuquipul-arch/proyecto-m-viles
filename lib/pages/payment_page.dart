@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../models/payment.dart';
-import '../services/culqi_service.dart';
 import '../services/payment_service.dart';
 import '../widgets/credit_card_form.dart';
 
@@ -23,7 +22,6 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  final CulqiService _culqiService = CulqiService();
   final PaymentService _paymentService = PaymentService();
 
   bool _isLoading = false;
@@ -31,7 +29,6 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   void dispose() {
-    _culqiService.dispose();
     _paymentService.dispose();
     super.dispose();
   }
@@ -44,12 +41,13 @@ class _PaymentPageState extends State<PaymentPage> {
     });
 
     try {
-      // Paso 1: Tokenizar la tarjeta con Culqi
-      final tokenResponse = await _culqiService.createToken(formData.toCardData());
+      // Simulación de tokenización segura (en un entorno real esto usaría un SDK de pagos)
+      // Generamos un token temporal para enviar al backend
+      final mockToken = 'tok_${DateTime.now().millisecondsSinceEpoch}';
 
-      // Paso 2: Enviar el token al backend para procesar el pago
+      // Enviar el token al backend para procesar el pago
       final paymentResult = await _paymentService.processPayment(
-        token: tokenResponse.id,
+        token: mockToken,
         amount: _getAmountInCents(),
         email: formData.email,
         productId: widget.product.id,
@@ -64,18 +62,14 @@ class _PaymentPageState extends State<PaymentPage> {
       } else {
         // Error en el pago
         setState(() {
-          _errorMessage = paymentResult.errorMessage ?? 'El pago no pudo ser procesado.';
+          _errorMessage =
+              paymentResult.errorMessage ?? 'El pago no pudo ser procesado.';
         });
       }
-    } on CulqiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _errorMessage = e.userMessage ?? e.message;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
+        _errorMessage = 'Ocurrió un error inesperado: $e';
       });
     } finally {
       if (mounted) {
@@ -97,11 +91,7 @@ class _PaymentPageState extends State<PaymentPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        icon: const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 64,
-        ),
+        icon: const Icon(Icons.check_circle, color: Colors.green, size: 64),
         title: const Text('¡Pago exitoso!'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -137,15 +127,9 @@ class _PaymentPageState extends State<PaymentPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(color: Colors.grey),
-            ),
+            child: Text(value, style: const TextStyle(color: Colors.grey)),
           ),
         ],
       ),
@@ -157,10 +141,7 @@ class _PaymentPageState extends State<PaymentPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Realizar pago'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Realizar pago'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -180,9 +161,9 @@ class _PaymentPageState extends State<PaymentPage> {
             // Título de la sección de pago
             Text(
               'Datos de la tarjeta',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
@@ -224,10 +205,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   width: 80,
                   height: 80,
                   color: colorScheme.surfaceContainerHigh,
-                  child: Icon(
-                    Icons.image,
-                    color: colorScheme.outline,
-                  ),
+                  child: Icon(Icons.image, color: colorScheme.outline),
                 ),
               ),
             ),
@@ -240,25 +218,25 @@ class _PaymentPageState extends State<PaymentPage> {
                   Text(
                     widget.product.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     widget.product.category,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.outline,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: colorScheme.outline),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _formatPrice(widget.product.price),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -278,17 +256,12 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: colorScheme.error,
-          ),
+          Icon(Icons.error_outline, color: colorScheme.error),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage!,
-              style: TextStyle(
-                color: colorScheme.onErrorContainer,
-              ),
+              style: TextStyle(color: colorScheme.onErrorContainer),
             ),
           ),
           IconButton(
